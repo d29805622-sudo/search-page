@@ -4,7 +4,7 @@ const CONFIG = {
     // GitHub 配置（请替换成你的）
     GITHUB: {
         OWNER: 'd29805622-sudo',
-        REPO: 'community-discussions',
+        REPO: '-ku',
         TOKEN: '' // 可选，公开访问不需要
     },
     
