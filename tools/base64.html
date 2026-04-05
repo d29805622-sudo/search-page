@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base64 编解码 - 极客工具箱</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .tool-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .tool-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .tool-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .tool-header p {
+            color: var(--text-secondary);
+        }
+        
+        .tool-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .editor-panel {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            margin-bottom: 10px;
+        }
+        
+        .panel-title {
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 14px;
+            resize: vertical;
+            outline: none;
+        }
+        
+        textarea:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+        
+        .swap-btn {
+            background: var(--bg-dark);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        
+        .swap-btn:hover {
+            transform: rotate(180deg);
+        }
+        
+        .status-bar {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        
+        .status-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .tool-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <span class="logo-icon">🔧</span>
+                <span class="logo-text">极客工具箱 | GeekBox</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../index.html#tools">工具箱</a></li>
+                <li><a href="../index.html#docs">干货库</a></li>
+                <li><a href="../index.html#community">社区</a></li>
+                <li><a href="../index.html#about">关于我们</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="tool-container">
+        <a href="../index.html" class="back-link">← 返回首页</a>
+        
+        <div class="tool-header">
+            <h1>🔐 Base64 编解码</h1>
+            <p>快速编码解码，支持中文，实时转换</p>
+        </div>
+
+        <div class="tool-content">
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <span class="panel-title" id="left-title">输入文本</span>
+                </div>
+                <textarea id="input" placeholder="请输入要编码或解码的文本..."></textarea>
+            </div>
+
+            <button class="swap-btn" onclick="swap()" title="交换">⇄</button>
+
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <span class="panel-title" id="right-title">Base64 结果</span>
+                </div>
+                <textarea id="output" readonly placeholder="结果将显示在这里..."></textarea>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="encode()">编码 →</button>
+            <button class="btn btn-primary" onclick="decode()">← 解码</button>
+            <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+            <button class="btn btn-secondary" onclick="copyOutput()">复制结果</button>
+        </div>
+
+        <div id="status" class="status-bar" style="display: none;"></div>
+    </div>
+
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        const status = document.getElementById('status');
+        const leftTitle = document.getElementById('left-title');
+        const rightTitle = document.getElementById('right-title');
+
+        let isEncoded = true; // true: 左边是原文，false: 左边是 Base64
+
+        // 实时转换
+        input.addEventListener('input', () => {
+            if (isEncoded) {
+                encode();
+            } else {
+                decode();
+            }
+        });
+
+        function encode() {
+            const value = input.value;
+            if (!value) {
+                output.value = '';
+                hideStatus();
+                return;
+            }
+
+            try {
+                const encoded = btoa(unescape(encodeURIComponent(value)));
+                output.value = encoded;
+                showStatus('✓ 编码成功', 'success');
+                isEncoded = true;
+                updateTitles();
+            } catch (e) {
+                showStatus('✗ 编码失败：' + e.message, 'error');
+            }
+        }
+
+        function decode() {
+            const value = input.value;
+            if (!value) {
+                output.value = '';
+                hideStatus();
+                return;
+            }
+
+            try {
+                const decoded = decodeURIComponent(escape(atob(value)));
+                output.value = decoded;
+                showStatus('✓ 解码成功', 'success');
+                isEncoded = false;
+                updateTitles();
+            } catch (e) {
+                showStatus('✗ 解码失败：无效的 Base64 字符串', 'error');
+            }
+        }
+
+        function swap() {
+            const temp = input.value;
+            input.value = output.value;
+            output.value = temp;
+            
+            isEncoded = !isEncoded;
+            updateTitles();
+            
+            if (isEncoded) {
+                encode();
+            } else {
+                decode();
+            }
+        }
+
+        function updateTitles() {
+            if (isEncoded) {
+                leftTitle.textContent = '输入文本';
+                rightTitle.textContent = 'Base64 结果';
+            } else {
+                leftTitle.textContent = 'Base64 编码';
+                rightTitle.textContent = '解码结果';
+            }
+        }
+
+        function clearAll() {
+            input.value = '';
+            output.value = '';
+            hideStatus();
+            input.focus();
+        }
+
+        function copyOutput() {
+            const text = output.value;
+            if (!text) {
+                showStatus('✗ 没有可复制的内容', 'error');
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => {
+                showStatus('✓ 已复制到剪贴板', 'success');
+            });
+        }
+
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = 'status-bar status-' + type;
+            status.style.display = 'block';
+            if (type === 'success') {
+                setTimeout(hideStatus, 3000);
+            }
+        }
+
+        function hideStatus() {
+            status.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

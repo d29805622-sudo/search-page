@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正则调试器 - 极客工具箱</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .tool-container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+        .tool-header { text-align: center; margin-bottom: 40px; }
+        .tool-header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .tool-header p { color: var(--text-secondary); }
+        .tool-content { display: grid; gap: 20px; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        .input-group label { font-weight: 600; }
+        textarea, input[type="text"] {
+            padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;
+            font-family: 'SF Mono', 'Monaco', monospace; font-size: 14px; outline: none;
+        }
+        textarea:focus, input:focus { border-color: var(--primary-color); }
+        textarea { min-height: 150px; resize: vertical; }
+        .regex-input { display: flex; gap: 10px; align-items: center; }
+        .regex-input input { flex: 1; }
+        .flags { display: flex; gap: 10px; }
+        .flag-checkbox { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        .result-area { background: var(--bg-secondary); padding: 20px; border-radius: 8px; min-height: 200px; }
+        .match-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 6px; border-left: 3px solid var(--primary-color); }
+        .match-text { font-family: monospace; background: #fef3c7; padding: 2px 6px; border-radius: 3px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: var(--primary-color); }
+        .back-link:hover { text-decoration: underline; }
+        .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-secondary { background: var(--bg-secondary); border: 1px solid var(--border-color); }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo"><span class="logo-icon">🔧</span><span class="logo-text">极客工具箱 | GeekBox</span></div>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../index.html#tools">工具箱</a></li>
+                <li><a href="../index.html#docs">干货库</a></li>
+                <li><a href="../index.html#community">社区</a></li>
+                <li><a href="../index.html#about">关于我们</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="tool-container">
+        <a href="../index.html" class="back-link">← 返回首页</a>
+        <div class="tool-header">
+            <h1>🔍 正则调试器</h1>
+            <p>实时匹配测试，高亮显示结果</p>
+        </div>
+
+        <div class="tool-content">
+            <div class="input-group">
+                <label>正则表达式</label>
+                <div class="regex-input">
+                    <span style="font-size: 1.5em;">/</span>
+                    <input type="text" id="pattern" placeholder="输入正则表达式，如：\d+" value="\d+">
+                    <span style="font-size: 1.5em;">/</span>
+                    <div class="flags">
+                        <label class="flag-checkbox"><input type="checkbox" id="flag-g" checked> g</label>
+                        <label class="flag-checkbox"><input type="checkbox" id="flag-i"> i</label>
+                        <label class="flag-checkbox"><input type="checkbox" id="flag-m"> m</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>测试文本</label>
+                <textarea id="text" placeholder="输入要匹配的文本...">电话：123-456-7890，邮箱：test@example.com，数字：42</textarea>
+            </div>
+
+            <div class="result-area">
+                <h3 style="margin-bottom: 15px;">匹配结果</h3>
+                <div id="results"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const patternInput = document.getElementById('pattern');
+        const textInput = document.getElementById('text');
+        const flagG = document.getElementById('flag-g');
+        const flagI = document.getElementById('flag-i');
+        const flagM = document.getElementById('flag-m');
+        const resultsDiv = document.getElementById('results');
+
+        patternInput.addEventListener('input', testRegex);
+        textInput.addEventListener('input', testRegex);
+        flagG.addEventListener('change', testRegex);
+        flagI.addEventListener('change', testRegex);
+        flagM.addEventListener('change', testRegex);
+
+        function testRegex() {
+            const pattern = patternInput.value;
+            const text = textInput.value;
+            
+            if (!pattern || !text) {
+                resultsDiv.innerHTML = '<p style="color: var(--text-light);">请输入正则表达式和测试文本</p>';
+                return;
+            }
+
+            try {
+                let flags = '';
+                if (flagG.checked) flags += 'g';
+                if (flagI.checked) flags += 'i';
+                if (flagM.checked) flags += 'm';
+
+                const regex = new RegExp(pattern, flags);
+                const matches = [...text.matchAll(regex)];
+
+                if (matches.length === 0) {
+                    resultsDiv.innerHTML = '<p style="color: var(--error);">✗ 未找到匹配项</p>';
+                    return;
+                }
+
+                let html = `<p style="margin-bottom: 15px; color: var(--success);">✓ 找到 ${matches.length} 个匹配项</p>`;
+                matches.forEach((match, i) => {
+                    html += `
+                        <div class="match-item">
+                            <div><strong>匹配 ${i + 1}:</strong> <span class="match-text">${escapeHtml(match[0])}</span></div>
+                            <div style="margin-top: 5px; font-size: 0.9em; color: var(--text-secondary);">
+                                位置：${match.index} - ${match.index + match[0].length}
+                            </div>
+                            ${match.groups ? `<div style="margin-top: 5px;">分组：${JSON.stringify(match.groups)}</div>` : ''}
+                        </div>
+                    `;
+                });
+                resultsDiv.innerHTML = html;
+            } catch (e) {
+                resultsDiv.innerHTML = `<p style="color: var(--error);">✗ 正则表达式错误：${e.message}</p>`;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        testRegex();
+    </script>
+</body>
+</html>

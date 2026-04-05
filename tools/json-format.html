@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON 格式化 - 极客工具箱</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .tool-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .tool-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .tool-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .tool-header p {
+            color: var(--text-secondary);
+        }
+        
+        .tool-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            height: calc(100vh - 300px);
+            min-height: 500px;
+        }
+        
+        .editor-panel {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .panel-title {
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        
+        .panel-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        textarea {
+            flex: 1;
+            width: 100%;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+        }
+        
+        textarea:focus {
+            border-color: var(--primary-color);
+        }
+        
+        pre {
+            flex: 1;
+            padding: 15px;
+            background: var(--bg-dark);
+            color: #e5e7eb;
+            border-radius: 8px;
+            overflow: auto;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .status-bar {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        
+        .status-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 900px) {
+            .tool-content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            textarea, pre {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <span class="logo-icon">🔧</span>
+                <span class="logo-text">极客工具箱 | GeekBox</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../index.html#tools">工具箱</a></li>
+                <li><a href="../index.html#docs">干货库</a></li>
+                <li><a href="../index.html#community">社区</a></li>
+                <li><a href="../index.html#about">关于我们</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="tool-container">
+        <a href="../index.html" class="back-link">← 返回首页</a>
+        
+        <div class="tool-header">
+            <h1>📝 JSON 格式化</h1>
+            <p>验证、美化、压缩 JSON 数据，支持错误提示</p>
+        </div>
+
+        <div class="tool-content">
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <span class="panel-title">输入 JSON</span>
+                    <div class="panel-actions">
+                        <button class="btn btn-secondary" onclick="clearInput()">清空</button>
+                        <button class="btn btn-secondary" onclick="pasteFromClipboard()">粘贴</button>
+                    </div>
+                </div>
+                <textarea id="input" placeholder="请输入 JSON 数据..."></textarea>
+                <div id="status" class="status-bar" style="display: none;"></div>
+            </div>
+
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <span class="panel-title">格式化结果</span>
+                    <div class="panel-actions">
+                        <button class="btn btn-secondary" onclick="copyResult()">复制</button>
+                        <button class="btn btn-secondary" onclick="downloadResult()">下载</button>
+                    </div>
+                </div>
+                <pre id="output"></pre>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn btn-primary" style="padding: 12px 40px; font-size: 16px;" onclick="formatJSON()">格式化</button>
+            <button class="btn btn-secondary" style="padding: 12px 40px; font-size: 16px; margin-left: 10px;" onclick="compressJSON()">压缩</button>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        const status = document.getElementById('status');
+
+        // 实时格式化（可选）
+        input.addEventListener('input', debounce(formatJSON, 500));
+
+        function formatJSON() {
+            const value = input.value.trim();
+            if (!value) {
+                output.textContent = '';
+                hideStatus();
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(value);
+                const formatted = JSON.stringify(parsed, null, 2);
+                output.textContent = formatted;
+                showStatus('✓ JSON 格式正确', 'success');
+            } catch (e) {
+                output.textContent = '';
+                showStatus('✗ 格式错误：' + e.message, 'error');
+            }
+        }
+
+        function compressJSON() {
+            const value = input.value.trim();
+            if (!value) return;
+
+            try {
+                const parsed = JSON.parse(value);
+                const compressed = JSON.stringify(parsed);
+                output.textContent = compressed;
+                showStatus('✓ 已压缩', 'success');
+            } catch (e) {
+                showStatus('✗ 格式错误：' + e.message, 'error');
+            }
+        }
+
+        function clearInput() {
+            input.value = '';
+            output.textContent = '';
+            hideStatus();
+            input.focus();
+        }
+
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                input.value = text;
+                formatJSON();
+            } catch (e) {
+                showStatus('✗ 无法访问剪贴板，请手动粘贴', 'error');
+            }
+        }
+
+        function copyResult() {
+            const text = output.textContent;
+            if (!text) {
+                showStatus('✗ 没有可复制的内容', 'error');
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => {
+                showStatus('✓ 已复制到剪贴板', 'success');
+            });
+        }
+
+        function downloadResult() {
+            const text = output.textContent;
+            if (!text) {
+                showStatus('✗ 没有可下载的内容', 'error');
+                return;
+            }
+            const blob = new Blob([text], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'formatted.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showStatus('✓ 已下载', 'success');
+        }
+
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = 'status-bar status-' + type;
+            status.style.display = 'block';
+            if (type === 'success') {
+                setTimeout(hideStatus, 3000);
+            }
+        }
+
+        function hideStatus() {
+            status.style.display = 'none';
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // 初始化
+        input.focus();
+    </script>
+</body>
+</html>

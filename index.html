@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极客工具箱 | GeekBox - 技术人的随身百宝箱</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <span class="logo-icon">🔧</span>
+                <span class="logo-text">极客工具箱 | GeekBox</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home" class="active">首页</a></li>
+                <li><a href="#tools">工具箱</a></li>
+                <li><a href="#docs">干货库</a></li>
+                <li><a href="#community">社区</a></li>
+                <li><a href="#about">关于我们</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 首屏黄金区 -->
+    <section id="home" class="hero">
+        <div class="container">
+            <h1 class="hero-title">无广告 · 免登录 · 全开源</h1>
+            <p class="hero-subtitle">技术人的随身百宝箱</p>
+            <p class="hero-desc">彻底解决网上工具站广告泛滥、强制登录、内容注水的痛点</p>
+            
+            <!-- 5 个高频工具入口 -->
+            <div class="quick-tools">
+                <a href="tools/json-format.html" class="quick-tool-card">
+                    <span class="tool-icon">📝</span>
+                    <span class="tool-name">JSON 格式化</span>
+                </a>
+                <a href="tools/code-format.html" class="quick-tool-card">
+                    <span class="tool-icon">💻</span>
+                    <span class="tool-name">代码格式化</span>
+                </a>
+                <a href="tools/regex.html" class="quick-tool-card">
+                    <span class="tool-icon">🔍</span>
+                    <span class="tool-name">正则调试器</span>
+                </a>
+                <a href="tools/base64.html" class="quick-tool-card">
+                    <span class="tool-icon">🔐</span>
+                    <span class="tool-name">Base64 编解码</span>
+                </a>
+                <a href="tools/qrcode.html" class="quick-tool-card">
+                    <span class="tool-icon">📱</span>
+                    <span class="tool-name">二维码生成</span>
+                </a>
+            </div>
+
+            <div class="hero-promise">
+                <span class="promise-badge">✓</span>
+                <span>所有功能完全免费</span>
+                <span class="promise-divider">|</span>
+                <span>无弹窗广告</span>
+                <span class="promise-divider">|</span>
+                <span>无需注册登录</span>
+                <span class="promise-divider">|</span>
+                <span>打开即用</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 工具箱分类 -->
+    <section id="tools" class="tools-section">
+        <div class="container">
+            <h2 class="section-title">🛠️ 全量工具箱</h2>
+            
+            <!-- 技术专属区 -->
+            <div class="tools-category">
+                <h3 class="category-title">💻 技术专属区</h3>
+                <div class="tools-grid">
+                    <a href="tools/json-format.html" class="tool-card">
+                        <span class="tool-card-icon">📝</span>
+                        <h4>JSON 格式化</h4>
+                        <p>验证、美化、压缩 JSON 数据</p>
+                    </a>
+                    <a href="tools/code-format.html" class="tool-card">
+                        <span class="tool-card-icon">💻</span>
+                        <h4>代码格式化</h4>
+                        <p>支持 JS/CSS/HTML/XML 格式化</p>
+                    </a>
+                    <a href="tools/regex.html" class="tool-card">
+                        <span class="tool-card-icon">🔍</span>
+                        <h4>正则调试器</h4>
+                        <p>实时匹配测试，高亮显示结果</p>
+                    </a>
+                    <a href="tools/base64.html" class="tool-card">
+                        <span class="tool-card-icon">🔐</span>
+                        <h4>Base64 编解码</h4>
+                        <p>快速编码解码，支持中文</p>
+                    </a>
+                    <a href="tools/markdown.html" class="tool-card">
+                        <span class="tool-card-icon">📄</span>
+                        <h4>Markdown 编辑器</h4>
+                        <p>实时预览，支持导出 HTML</p>
+                    </a>
+                    <a href="tools/hash.html" class="tool-card">
+                        <span class="tool-card-icon">🔏</span>
+                        <h4>哈希计算</h4>
+                        <p>MD5/SHA1/SHA256 计算</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 通用实用区 -->
+            <div class="tools-category">
+                <h3 class="category-title">🔧 通用实用区</h3>
+                <div class="tools-grid">
+                    <a href="tools/qrcode.html" class="tool-card">
+                        <span class="tool-card-icon">📱</span>
+                        <h4>二维码生成</h4>
+                        <p>文本/链接转二维码，支持下载</p>
+                    </a>
+                    <a href="tools/color.html" class="tool-card">
+                        <span class="tool-card-icon">🎨</span>
+                        <h4>颜色转换器</h4>
+                        <p>HEX/RGB/HSL 互转</p>
+                    </a>
+                    <a href="tools/timestamp.html" class="tool-card">
+                        <span class="tool-card-icon">⏰</span>
+                        <h4>时间戳转换</h4>
+                        <p>时间戳与日期时间互转</p>
+                    </a>
+                    <a href="tools/word-count.html" class="tool-card">
+                        <span class="tool-card-icon">📊</span>
+                        <h4>字数统计</h4>
+                        <p>实时统计字符数、单词数</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 干货库 -->
+    <section id="docs" class="docs-section">
+        <div class="container">
+            <h2 class="section-title">📚 干货库</h2>
+            <div class="docs-grid">
+                <article class="doc-card">
+                    <span class="doc-tag">踩坑实录</span>
+                    <h3>新手配置 Node.js 环境的 5 个大坑</h3>
+                    <p>npm install 失败、版本冲突、全局权限问题...一文解决所有环境配置问题</p>
+                    <div class="doc-meta">
+                        <span class="doc-author">by @技术老司机</span>
+                        <span class="doc-date">2026-04-01</span>
+                    </div>
+                </article>
+                <article class="doc-card">
+                    <span class="doc-tag">开源推荐</span>
+                    <h3>10 个小众但超好用的 GitHub 开源项目</h3>
+                    <p>每周更新，发现那些 star 不多但真正好用的开发工具</p>
+                    <div class="doc-meta">
+                        <span class="doc-author">by @开源猎手</span>
+                        <span class="doc-date">2026-03-28</span>
+                    </div>
+                </article>
+                <article class="doc-card">
+                    <span class="doc-tag">技术教程</span>
+                    <h3>从零部署一个 AI 聊天机器人（完整教程）</h3>
+                    <p>包含环境配置、模型选择、API 对接、部署上线全流程</p>
+                    <div class="doc-meta">
+                        <span class="doc-author">by @AI 实践者</span>
+                        <span class="doc-date">2026-03-25</span>
+                    </div>
+                </article>
+            </div>
+            <div class="docs-more">
+                <a href="#" class="btn-outline">查看更多干货 →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 社区 -->
+    <section id="community" class="community-section">
+        <div class="container">
+            <h2 class="section-title">👥 技术社区</h2>
+            <div class="community-grid">
+                <div class="community-card">
+                    <span class="community-icon">✍️</span>
+                    <h3>开放投稿</h3>
+                    <p>分享你的技术笔记、开源项目，审核通过后带署名发布</p>
+                    <a href="#" class="btn-primary">立即投稿</a>
+                </div>
+                <div class="community-card">
+                    <span class="community-icon">❓</span>
+                    <h3>纯净问答</h3>
+                    <p>严格管控无杠精无灌水，只留有效技术解答</p>
+                    <a href="#" class="btn-primary">去提问</a>
+                </div>
+                <div class="community-card">
+                    <span class="community-icon">📦</span>
+                    <h3>资源共享</h3>
+                    <p>无套路免费分享开发工具、源码包、镜像资源</p>
+                    <a href="#" class="btn-primary">浏览资源</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于我们 -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <h2 class="section-title">🎯 关于我们</h2>
+            <div class="about-content">
+                <p><strong>极客工具箱（GeekBox）</strong> 是一个完全免费、无广告、免登录的在线工具集合网站。</p>
+                <p>我们致力于解决网上工具站广告泛滥、强制登录、内容注水、资源套路的行业痛点，为开发者、技术爱好者、学生党提供一个纯净、高效、好用的工具箱。</p>
+                <p>所有工具均在前端运行，不收集任何用户数据。所有代码开源，欢迎贡献。</p>
+                <div class="about-links">
+                    <a href="https://github.com/d29805622-sudo/geekbox" class="btn-primary" target="_blank">
+                        🐙 GitHub 开源项目
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 极客工具箱 | GeekBox - Made with ❤️ for developers</p>
+            <p class="footer-note">无广告 · 免登录 · 全开源</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

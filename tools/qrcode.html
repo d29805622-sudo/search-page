@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二维码生成 - 极客工具箱</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .tool-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .tool-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .tool-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .tool-header p {
+            color: var(--text-secondary);
+        }
+        
+        .tool-content {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            outline: none;
+        }
+        
+        textarea:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .option-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .option-item label {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+        
+        select, input[type="number"], input[type="color"] {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        select:focus, input:focus {
+            border-color: var(--primary-color);
+        }
+        
+        input[type="color"] {
+            width: 100%;
+            height: 40px;
+            padding: 2px;
+            cursor: pointer;
+        }
+        
+        .qrcode-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        
+        #qrcode {
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .status-bar {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        
+        .status-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <span class="logo-icon">🔧</span>
+                <span class="logo-text">极客工具箱 | GeekBox</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../index.html#tools">工具箱</a></li>
+                <li><a href="../index.html#docs">干货库</a></li>
+                <li><a href="../index.html#community">社区</a></li>
+                <li><a href="../index.html#about">关于我们</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="tool-container">
+        <a href="../index.html" class="back-link">← 返回首页</a>
+        
+        <div class="tool-header">
+            <h1>📱 二维码生成器</h1>
+            <p>文本/链接转二维码，支持自定义颜色和尺寸</p>
+        </div>
+
+        <div class="tool-content">
+            <div class="input-group">
+                <label for="content">输入内容（文本或链接）</label>
+                <textarea id="content" rows="4" placeholder="请输入要生成二维码的内容..."></textarea>
+            </div>
+
+            <div class="options-grid">
+                <div class="option-item">
+                    <label>尺寸（像素）</label>
+                    <input type="number" id="size" value="256" min="128" max="512" step="64">
+                </div>
+                <div class="option-item">
+                    <label>前景色</label>
+                    <input type="color" id="colorDark" value="#000000">
+                </div>
+                <div class="option-item">
+                    <label>背景色</label>
+                    <input type="color" id="colorLight" value="#ffffff">
+                </div>
+            </div>
+
+            <div class="qrcode-container">
+                <div id="qrcode"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="generate()">生成二维码</button>
+                <button class="btn btn-secondary" onclick="downloadPNG()">下载 PNG</button>
+                <button class="btn btn-secondary" onclick="downloadSVG()">下载 SVG</button>
+            </div>
+
+            <div id="status" class="status-bar" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+        const contentInput = document.getElementById('content');
+        const sizeInput = document.getElementById('size');
+        const colorDarkInput = document.getElementById('colorDark');
+        const colorLightInput = document.getElementById('colorLight');
+        const qrcodeContainer = document.getElementById('qrcode');
+        const status = document.getElementById('status');
+
+        let currentQRCode = null;
+
+        // 实时生成（防抖）
+        contentInput.addEventListener('input', debounce(generate, 500));
+        sizeInput.addEventListener('change', generate);
+        colorDarkInput.addEventListener('change', generate);
+        colorLightInput.addEventListener('change', generate);
+
+        function generate() {
+            const content = contentInput.value.trim();
+            if (!content) {
+                qrcodeContainer.innerHTML = '<p style="color: var(--text-light);">请输入内容以生成二维码</p>';
+                hideStatus();
+                return;
+            }
+
+            const size = parseInt(sizeInput.value) || 256;
+            const colorDark = colorDarkInput.value;
+            const colorLight = colorLightInput.value;
+
+            try {
+                qrcodeContainer.innerHTML = '';
+                
+                const canvas = document.createElement('canvas');
+                QRCode.toCanvas(canvas, content, {
+                    width: size,
+                    color: {
+                        dark: colorDark,
+                        light: colorLight
+                    },
+                    errorCorrectionLevel: 'M'
+                }, (error) => {
+                    if (error) {
+                        showStatus('✗ 生成失败：' + error.message, 'error');
+                    } else {
+                        qrcodeContainer.innerHTML = '';
+                        qrcodeContainer.appendChild(canvas);
+                        currentQRCode = canvas;
+                        showStatus('✓ 二维码已生成', 'success');
+                    }
+                });
+            } catch (e) {
+                showStatus('✗ 生成失败：' + e.message, 'error');
+            }
+        }
+
+        function downloadPNG() {
+            if (!currentQRCode) {
+                showStatus('✗ 先生成二维码', 'error');
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.download = 'qrcode.png';
+            link.href = currentQRCode.toDataURL('image/png');
+            link.click();
+            showStatus('✓ PNG 已下载', 'success');
+        }
+
+        function downloadSVG() {
+            const content = contentInput.value.trim();
+            if (!content) {
+                showStatus('✗ 先生成二维码', 'error');
+                return;
+            }
+
+            const colorDark = colorDarkInput.value;
+            const colorLight = colorLightInput.value;
+
+            QRCode.toString(content, {
+                type: 'svg',
+                color: {
+                    dark: colorDark,
+                    light: colorLight
+                },
+                width: parseInt(sizeInput.value) || 256
+            }, (error, svg) => {
+                if (error) {
+                    showStatus('✗ 生成失败：' + error.message, 'error');
+                } else {
+                    const blob = new Blob([svg], { type: 'image/svg+xml' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.download = 'qrcode.svg';
+                    link.href = url;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    showStatus('✓ SVG 已下载', 'success');
+                }
+            });
+        }
+
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = 'status-bar status-' + type;
+            status.style.display = 'block';
+            if (type === 'success') {
+                setTimeout(hideStatus, 3000);
+            }
+        }
+
+        function hideStatus() {
+            status.style.display = 'none';
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // 初始化生成一个示例
+        window.onload = () => {
+            contentInput.value = 'https://github.com/d29805622-sudo/geekbox';
+            generate();
+        };
+    </script>
+</body>
+</html>

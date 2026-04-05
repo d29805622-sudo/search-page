@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间戳转换 - 极客工具箱</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .tool-container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .tool-header { text-align: center; margin-bottom: 40px; }
+        .tool-header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .tool-header p { color: var(--text-secondary); }
+        .tool-content { background: white; padding: 40px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .converter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .converter-section { display: flex; flex-direction: column; gap: 15px; }
+        .converter-section h3 { margin-bottom: 10px; }
+        label { font-weight: 600; display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; }
+        input:focus, select:focus { border-color: var(--primary-color); }
+        .btn { padding: 12px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; width: 100%; }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-secondary { background: var(--bg-secondary); border: 1px solid var(--border-color); }
+        .current-time { background: var(--bg-dark); color: white; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 30px; }
+        .current-time .timestamp { font-size: 2em; font-family: monospace; margin: 10px 0; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: var(--primary-color); }
+        .back-link:hover { text-decoration: underline; }
+        @media (max-width: 768px) { .converter-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo"><span class="logo-icon">🔧</span><span class="logo-text">极客工具箱 | GeekBox</span></div>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../index.html#tools">工具箱</a></li>
+                <li><a href="../index.html#docs">干货库</a></li>
+                <li><a href="../index.html#community">社区</a></li>
+                <li><a href="../index.html#about">关于我们</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="tool-container">
+        <a href="../index.html" class="back-link">← 返回首页</a>
+        <div class="tool-header">
+            <h1>⏰ 时间戳转换</h1>
+            <p>时间戳与日期时间互转，支持多种格式</p>
+        </div>
+
+        <div class="tool-content">
+            <div class="current-time">
+                <div>当前时间</div>
+                <div class="timestamp" id="currentTimestamp">0</div>
+                <div id="currentDateTime">--</div>
+            </div>
+
+            <div class="converter-grid">
+                <div class="converter-section">
+                    <h3>时间戳 → 日期时间</h3>
+                    <label>时间戳（毫秒）</label>
+                    <input type="number" id="timestampInput" placeholder="如：1712304000000">
+                    <button class="btn btn-primary" onclick="timestampToDateTime()">转换</button>
+                    <div id="dateTimeResult" style="margin-top: 15px; padding: 15px; background: var(--bg-secondary); border-radius: 6px; min-height: 60px;"></div>
+                </div>
+
+                <div class="converter-section">
+                    <h3>日期时间 → 时间戳</h3>
+                    <label>日期时间</label>
+                    <input type="datetime-local" id="dateTimeInput">
+                    <button class="btn btn-primary" onclick="dateTimeToTimestamp()">转换</button>
+                    <div id="timestampResult" style="margin-top: 15px; padding: 15px; background: var(--bg-secondary); border-radius: 6px; min-height: 60px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const timestampInput = document.getElementById('timestampInput');
+        const dateTimeInput = document.getElementById('dateTimeInput');
+        const dateTimeResult = document.getElementById('dateTimeResult');
+        const timestampResult = document.getElementById('timestampResult');
+        const currentTimestampEl = document.getElementById('currentTimestamp');
+        const currentDateTimeEl = document.getElementById('currentDateTime');
+
+        // 实时更新当前时间
+        function updateCurrentTime() {
+            const now = Date.now();
+            currentTimestampEl.textContent = now;
+            currentDateTimeEl.textContent = new Date().toLocaleString('zh-CN');
+        }
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+
+        // 设置默认值为当前时间
+        const now = new Date();
+        dateTimeInput.value = now.toISOString().slice(0, 16);
+
+        function timestampToDateTime() {
+            const timestamp = parseInt(timestampInput.value);
+            if (!timestamp) {
+                dateTimeResult.innerHTML = '<p style="color: var(--error);">请输入时间戳</p>';
+                return;
+            }
+            const date = new Date(timestamp);
+            dateTimeResult.innerHTML = `
+                <div><strong>北京时间：</strong>${date.toLocaleString('zh-CN')}</div>
+                <div><strong>UTC 时间：</strong>${date.toUTCString()}</div>
+                <div><strong>ISO 格式：</strong>${date.toISOString()}</div>
+            `;
+        }
+
+        function dateTimeToTimestamp() {
+            const value = dateTimeInput.value;
+            if (!value) {
+                timestampResult.innerHTML = '<p style="color: var(--error);">请选择日期时间</p>';
+                return;
+            }
+            const date = new Date(value);
+            const timestamp = date.getTime();
+            timestampResult.innerHTML = `
+                <div><strong>毫秒时间戳：</strong>${timestamp}</div>
+                <div><strong>秒时间戳：</strong>${Math.floor(timestamp / 1000)}</div>
+            `;
+        }
+
+        // 实时转换
+        timestampInput.addEventListener('input', timestampToDateTime);
+        dateTimeInput.addEventListener('input', dateTimeToTimestamp);
+    </script>
+</body>
+</html>
