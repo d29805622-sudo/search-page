@@ -27,9 +27,8 @@ function checkLogin() {
 
 // 登录
 function login() {
-    // 简化版：直接使用 GitHub OAuth
-    const clientId = 'Ov23liGqfhGvY8pUMZ3L'; // 示例 ID，需要替换
-    const redirectUri = encodeURIComponent(window.location.origin + '/community/callback.html');
+    const clientId = 'Ov23liKA4L9lB4fcn74T';
+    const redirectUri = encodeURIComponent(window.location.origin + '/search-page/callback.html');
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=public_repo`;
 }
 

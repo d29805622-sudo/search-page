@@ -71,8 +71,8 @@ const GitHubAPI = {
     
     // GitHub OAuth 登录
     login() {
-        const clientId = 'YOUR_GITHUB_CLIENT_ID'; // 需要配置
-        const redirectUri = window.location.origin + '/community/callback.html';
+        const clientId = 'Ov23liKA4L9lB4fcn74T';
+        const redirectUri = window.location.origin + '/search-page/callback.html';
         const scope = 'public_repo,user';
         window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
     },
