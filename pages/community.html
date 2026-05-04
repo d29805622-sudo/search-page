@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>玩家社区 - 幻想三国</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/community.css">
+    <style>
+        body {
+            font-family: "Microsoft Yahei", sans-serif;
+            background: #050508;
+            color: #f5f5f5;
+            line-height: 1.7;
+        }
+        
+        .bg-wrap {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(145deg, #07070e, #120c0c, #06060a);
+        }
+        
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px 40px;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .page-title {
+            font-size: 36px;
+            background: linear-gradient(135deg, #b89668, #8c704e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .brush-font {
+            font-family: "Ma Shan Zheng", cursive;
+        }
+        
+        /* 登录提示 */
+        .login-prompt {
+            text-align: center;
+            padding: 40px;
+            background: rgba(20, 20, 28, 0.9);
+            border-radius: 12px;
+            border: 1px solid rgba(184, 150, 104, 0.2);
+            margin-bottom: 24px;
+        }
+        
+        .login-prompt p {
+            color: #888;
+            margin-bottom: 16px;
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 600px) {
+            .page-container {
+                padding: 60px 12px 20px;
+            }
+            
+            .page-title {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-wrap"></div>
+    
+    <!-- 导航栏 -->
+    <nav class="top-nav">
+        <a href="../index.html" class="nav-link">首页</a>
+        <a href="community.html" class="nav-link active">玩家社区</a>
+        <a href="posts.html" class="nav-link">攻略中心</a>
+    </nav>
+    
+    <div class="page-container">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <h1 class="page-title brush-font">玩家社区</h1>
+        </div>
+        
+        <!-- 公告 -->
+        <div class="announcement-banner">
+            <div class="announcement-title">
+                <span>📢</span>
+                <span class="brush-font">欢迎来到幻想三国社区</span>
+            </div>
+            <p class="announcement-content">
+                在这里你可以与玩家交流游戏心得、分享攻略、提出问题。登录 GitHub 账号即可参与讨论！
+            </p>
+        </div>
+        
+        <!-- 社区内容 -->
+        <div class="community-container">
+            <!-- 主内容区 -->
+            <main class="community-main">
+                <!-- 分类筛选 -->
+                <div class="category-tabs">
+                    <button class="category-tab active" data-category="">全部</button>
+                    <button class="category-tab" data-category="tech">💻 技术讨论</button>
+                    <button class="category-tab" data-category="question">❓ 问答求助</button>
+                    <button class="category-tab" data-category="share">📦 资源分享</button>
+                    <button class="category-tab" data-category="project">🚀 项目展示</button>
+                    <button class="category-tab" data-category="career">💼 职业发展</button>
+                </div>
+                
+                <!-- 登录提示（未登录时显示） -->
+                <div class="login-prompt" id="loginPrompt">
+                    <p>登录 GitHub 账号即可发帖和评论</p>
+                    <button class="btn btn-primary" onclick="login()">使用 GitHub 登录</button>
+                </div>
+                
+                <!-- 发帖按钮（已登录时显示） -->
+                <div id="createSection" style="display: none; margin-bottom: 20px;">
+                    <button class="btn btn-primary" onclick="showCreateForm()">✏️ 发布新帖</button>
+                </div>
+                
+                <!-- 发帖表单 -->
+                <div class="create-post-form" id="createForm" style="display: none;">
+                    <h3 style="color: #b89668; margin-bottom: 20px;">发布新帖</h3>
+                    <div class="form-group">
+                        <label>标题</label>
+                        <input type="text" id="postTitle" placeholder="请输入帖子标题" maxlength="200">
+                    </div>
+                    <div class="form-group">
+                        <label>分类</label>
+                        <select id="postCategory">
+                            <option value="tech">💻 技术讨论</option>
+                            <option value="question">❓ 问答求助</option>
+                            <option value="share">📦 资源分享</option>
+                            <option value="project">🚀 项目展示</option>
+                            <option value="career">💼 职业发展</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>内容</label>
+                        <textarea id="postContent" placeholder="请输入帖子内容..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>标签（用逗号分隔）</label>
+                        <input type="text" id="postTags" placeholder="例如: JavaScript, 前端, 教程">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" onclick="hideCreateForm()">取消</button>
+                        <button class="btn btn-primary" onclick="submitPost()">发布</button>
+                    </div>
+                </div>
+                
+                <!-- 帖子列表 -->
+                <div class="posts-list" id="postsList">
+                    <div class="loading">加载中...</div>
+                </div>
+                
+                <!-- 分页 -->
+                <div class="pagination" id="pagination"></div>
+            </main>
+            
+            <!-- 侧边栏 -->
+            <aside class="community-sidebar">
+                <div class="sidebar-card">
+                    <h3 class="brush-font">社区统计</h3>
+                    <div class="sidebar-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="statPosts">-</div>
+                            <div class="stat-label">总帖子</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="statUsers">-</div>
+                            <div class="stat-label">参与用户</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="statToday">-</div>
+                            <div class="stat-label">今日发帖</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="statComments">-</div>
+                            <div class="stat-label">总评论</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 用户信息（已登录时显示） -->
+                <div class="sidebar-card" id="userCard" style="display: none;">
+                    <h3 class="brush-font">我的信息</h3>
+                    <div class="user-card">
+                        <img src="" alt="头像" class="user-avatar" id="userAvatar">
+                        <div class="user-info">
+                            <div class="user-name" id="userName">-</div>
+                            <span class="user-level" id="userLevel">新手</span>
+                        </div>
+                    </div>
+                    <div style="text-align: center; color: #b89668; margin-top: 12px;">
+                        <span id="userPoints">0</span> 积分
+                    </div>
+                </div>
+                
+                <!-- 热门标签 -->
+                <div class="sidebar-card">
+                    <h3 class="brush-font">热门标签</h3>
+                    <div class="post-tags">
+                        <span class="post-tag">JavaScript</span>
+                        <span class="post-tag">Python</span>
+                        <span class="post-tag">前端</span>
+                        <span class="post-tag">后端</span>
+                        <span class="post-tag">AI</span>
+                        <span class="post-tag">数据库</span>
+                        <span class="post-tag">Docker</span>
+                        <span class="post-tag">Git</span>
+                    </div>
+                </div>
+                
+                <!-- 社区规则 -->
+                <div class="sidebar-card">
+                    <h3 class="brush-font">社区公约</h3>
+                    <ul style="color: #888; font-size: 13px; padding-left: 16px; line-height: 1.8;">
+                        <li>尊重他人，友善交流</li>
+                        <li>禁止发布广告内容</li>
+                        <li>禁止人身攻击</li>
+                        <li>鼓励分享原创内容</li>
+                        <li>问题解决后请标记</li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </div>
+    
+    <!-- 帖子详情弹窗 -->
+    <div class="modal-overlay" id="postModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">帖子详情</h2>
+                <button class="modal-close" onclick="closePostModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- 动态内容 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 加载 Scripts -->
+    <script src="../js/config.js"></script>
+    <script src="../js/github.js"></script>
+    <script src="../js/app.js"></script>
+</body>
+</html>
