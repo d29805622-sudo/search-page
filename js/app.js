@@ -1,264 +1,574 @@
-// 极客社区 - 主应用逻辑
+// 小魔头Galgame论坛 - Supabase应用
 
-let currentPage = 1;
-let currentFilter = 'all';
-let currentCategory = '';
+const SUPABASE_URL = 'https://btkupvzkzwnbbhpgkksc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0a3VwdnpreXduYmJocGdrazNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTIzMjAyMTYsImV4cCI6MjAyNzg5NjIxNn0.r3G3LQ-GOWqLpRvC9e7lRhH3a3P6t8XqOi3lGdQ8W8U';
 
-// 初始化
-document.addEventListener('DOMContentLoaded', () => {
-    checkLogin();
-    loadPosts();
-    loadSidebar();
-    setupSearch();
+let supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentPost = null;
+let currentCategory = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await initApp();
+    setupEventListeners();
 });
 
-// 检查登录状态
-function checkLogin() {
-    const user = localStorage.getItem('github_user');
-    if (user) {
-        const userData = JSON.parse(user);
-        document.getElementById('loginBtn').style.display = 'none';
-        document.getElementById('createBtn').style.display = 'inline-block';
-        document.getElementById('userMenu').style.display = 'flex';
-        document.getElementById('userName').textContent = userData.login;
-        document.getElementById('userAvatar').src = userData.avatar_url;
+async function initApp() {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        updateUserUI();
     }
+    await loadCategories();
+    await loadHomePosts();
 }
 
-// 登录
-function login() {
-    const clientId = 'Ov23liKA4L9lB4fcn74T';
-    const redirectUri = encodeURIComponent(window.location.origin + '/search-page/callback.html');
-    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=public_repo`;
-}
-
-// 加载帖子列表
-async function loadPosts() {
-    const postsList = document.getElementById('postsList');
-    postsList.innerHTML = '<div class="loading">加载中...</div>';
-    
-    try {
-        const labels = currentCategory ? [currentCategory] : [];
-        const issues = await GitHubAPI.getIssues(currentPage, labels);
-        
-        if (issues.length === 0) {
-            postsList.innerHTML = '<div class="loading">暂无帖子，快来发第一个帖吧！</div>';
-            return;
-        }
-        
-        renderPosts(issues, postsList);
-        updateStats(issues);
-    } catch (error) {
-        console.error('Load posts error:', error);
-        postsList.innerHTML = `
-            <div class="loading">
-                <p>加载失败，请刷新重试</p>
-                <p style="font-size: 0.9em; color: var(--text-light);">${error.message}</p>
-            </div>
-        `;
-    }
-}
-
-// 渲染帖子
-function renderPosts(issues, container) {
-    container.innerHTML = issues.map(issue => {
-        const tags = issue.labels.map(label => 
-            `<span class="post-tag ${label.name === 'solved' ? 'solved' : ''}">${label.name}</span>`
-        ).join('');
-        
-        const category = issue.labels.find(l => ['tech', 'question', 'share', 'project', 'career'].includes(l.name));
-        const categoryTag = category ? `<span class="post-tag category">${CONFIG.COMMUNITY.CATEGORIES.find(c => c.id === category.name)?.name || category.name}</span>` : '';
-        
-        const isHot = issue.comments > 10;
-        const hotTag = isHot ? '<span class="post-tag hot">🔥</span>' : '';
-        
-        return `
-            <div class="post-card" onclick="openPost(${issue.number})">
-                <div class="post-header">
-                    <h3 class="post-title">${escapeHtml(issue.title)}</h3>
-                    <div class="post-tags">
-                        ${categoryTag}
-                        ${tags}
-                        ${hotTag}
-                    </div>
-                </div>
-                <div class="post-meta">
-                    <div class="post-author">
-                        <img src="${issue.user.avatar_url}" alt="${issue.user.login}">
-                        <span>@${issue.user.login}</span>
-                    </div>
-                    <div class="post-stats">
-                        <span class="post-stat">💬 ${issue.comments}</span>
-                        <span class="post-stat">👍 ${issue.reactions?.+1 || 0}</span>
-                        <span class="post-stat">👁️ ${formatViews(issue.reactions?.eyes || 0)}</span>
-                        <span class="post-stat">🕐 ${formatTime(issue.created_at)}</span>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-// 加载侧边栏
-async function loadSidebar() {
-    // 热门标签
-    const hotTags = document.getElementById('hotTags');
-    hotTags.innerHTML = CONFIG.COMMUNITY.TAGS.map(tag => 
-        `<a href="#" class="tag hot" onclick="searchByTag('${tag}')">${tag}</a>`
-    ).join('');
-    
-    // 热门帖子（示例数据）
-    const hotPosts = document.getElementById('hotPosts');
-    hotPosts.innerHTML = `
-        <div class="hot-post-item" onclick="openPost(1)">
-            <div class="hot-post-title">React 18 的 Concurrent Features 怎么用？</div>
-            <div class="hot-post-stats">💬 23 · 👍 45 · 2 小时前</div>
-        </div>
-        <div class="hot-post-item" onclick="openPost(2)">
-            <div class="hot-post-title">Node.js 内存泄漏排查技巧</div>
-            <div class="hot-post-stats">💬 18 · 👍 32 · 5 小时前</div>
-        </div>
-        <div class="hot-post-item" onclick="openPost(3)">
-            <div class="hot-post-title">分享一个超好用的 VS Code 插件</div>
-            <div class="hot-post-stats">💬 12 · 👍 28 · 昨天</div>
-        </div>
-    `;
-    
-    // 活跃用户（示例数据）
-    const activeUsers = document.getElementById('activeUsers');
-    activeUsers.innerHTML = `
-        <div class="user-item">
-            <img src="https://github.com/github.png" alt="user">
-            <div class="user-info">
-                <div class="user-name">@torvalds</div>
-                <div class="user-level">Lv.10 社区大佬</div>
-            </div>
-        </div>
-        <div class="user-item">
-            <img src="https://github.com/github.png" alt="user">
-            <div class="user-info">
-                <div class="user-name">@gaearon</div>
-                <div class="user-level">Lv.9 技术达人</div>
-            </div>
-        </div>
-        <div class="user-item">
-            <img src="https://github.com/github.png" alt="user">
-            <div class="user-info">
-                <div class="user-name">@sindresorhus</div>
-                <div class="user-level">Lv.9 开源狂魔</div>
-            </div>
-        </div>
-    `;
-    
-    // 最近活动（示例数据）
-    const recentActivity = document.getElementById('recentActivity');
-    recentActivity.innerHTML = `
-        <div class="activity-item">
-            <span class="activity-user">@张三</span>
-            <span class="activity-action">发布了新帖子</span>
-            <div class="activity-time">2 分钟前</div>
-        </div>
-        <div class="activity-item">
-            <span class="activity-user">@李四</span>
-            <span class="activity-action">评论了帖子</span>
-            <div class="activity-time">5 分钟前</div>
-        </div>
-        <div class="activity-item">
-            <span class="activity-user">@王五</span>
-            <span class="activity-action">获得了 10 个赞</span>
-            <div class="activity-time">10 分钟前</div>
-        </div>
-    `;
-}
-
-// 筛选帖子
-function filterPosts(filter) {
-    currentFilter = filter;
-    currentPage = 1;
-    
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    
-    loadPosts();
-}
-
-// 按分类筛选
-function filterByCategory() {
-    currentCategory = document.getElementById('categoryFilter').value;
-    currentPage = 1;
-    loadPosts();
-}
-
-// 加载更多
-function loadMore() {
-    currentPage++;
-    loadPosts();
-}
-
-// 打开帖子
-function openPost(number) {
-    window.location.href = `pages/post.html?number=${number}`;
-}
-
-// 搜索
-function setupSearch() {
-    const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') search();
+function setupEventListeners() {
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', handleNavClick);
+    });
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+        tab.addEventListener('click', handleAuthTabClick);
+    });
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.addEventListener('click', handleAdminTabClick);
     });
 }
 
-function search() {
-    const query = document.getElementById('searchInput').value;
-    if (query) {
-        window.location.href = `pages/search.html?q=${encodeURIComponent(query)}`;
+function handleNavClick(e) {
+    e.preventDefault();
+    const page = e.target.dataset.page;
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    e.target.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+    switch(page) {
+        case 'home':
+            document.getElementById('page-home').classList.add('active');
+            loadHomePosts();
+            break;
+        case 'xiaomogui':
+            navigateToCategory(1);
+            break;
+        case 'ggame':
+            navigateToCategory(2);
+            break;
+        case 'upload':
+            if (!currentUser) {
+                showToast('请先登录', 'warning');
+                navigateTo('login');
+            } else {
+                document.getElementById('page-editor').classList.add('active');
+                loadCategoriesToEditor();
+            }
+            break;
+        case 'login':
+            navigateTo('login');
+            break;
     }
 }
 
-function searchByTag(tag) {
-    window.location.href = `pages/search.html?tag=${encodeURIComponent(tag)}`;
+function navigateTo(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(`page-${page}`).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.page === page);
+    });
 }
 
-// 更新统计
-function updateStats(issues) {
-    document.getElementById('totalPosts').textContent = issues.length;
-    document.getElementById('totalUsers').textContent = Math.floor(Math.random() * 1000) + 100;
-    document.getElementById('totalComments').textContent = Math.floor(Math.random() * 5000) + 500;
+async function navigateToCategory(cateId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-category').classList.add('active');
+    currentCategory = cateId;
+    await loadCategoryInfo(cateId);
+    await loadCategoryPosts(cateId);
 }
 
-// 工具函数
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+async function loadCategories() {
+    const container = document.getElementById('categories');
+    try {
+        const { data, error } = await supabase
+            .from('category')
+            .select('*')
+            .eq('status', 1)
+            .order('sort', { ascending: true });
+        
+        if (error) throw error;
+        
+        const icons = ['👻', '🎮', '📦', '🎨'];
+        container.innerHTML = data.map((cat, i) => `
+            <div class="category-card" onclick="navigateToCategory(${cat.id})">
+                <div class="category-icon">${icons[i] || '📁'}</div>
+                <div class="category-name">${cat.name}</div>
+                <div class="category-desc">${cat.desc || ''}</div>
+                <div class="category-stats"><span>查看详情 →</span></div>
+            </div>
+        `).join('');
+    } catch (error) {
+        container.innerHTML = `
+            <div class="category-card" onclick="navigateToCategory(1)"><div class="category-icon">👻</div><div class="category-name">小魔头暴露啦专区</div><div class="category-desc">动漫剧情、角色、同人讨论</div><div class="category-stats"><span>查看详情 →</span></div></div>
+            <div class="category-card" onclick="navigateToCategory(2)"><div class="category-icon">🎮</div><div class="category-name">Galgame交流区</div><div class="category-desc">Galgame玩法、剧情、测评</div><div class="category-stats"><span>查看详情 →</span></div></div>
+            <div class="category-card" onclick="navigateToCategory(3)"><div class="category-icon">📦</div><div class="category-name">游戏包上传下载</div><div class="category-desc">Galgame游戏包、补丁、MOD上传下载</div><div class="category-stats"><span>查看详情 →</span></div></div>
+            <div class="category-card" onclick="navigateToCategory(4)"><div class="category-icon">🎨</div><div class="category-name">同人创作区</div><div class="category-desc">同人文、同人图、剪辑作品</div><div class="category-stats"><span>查看详情 →</span></div></div>
+        `;
+    }
 }
 
-function formatTime(dateStr) {
+async function loadCategoryInfo(cateId) {
+    try {
+        const { data } = await supabase.from('category').select('*').eq('id', cateId).single();
+        if (data) document.getElementById('categoryTitle').textContent = data.name;
+    } catch (error) {}
+    document.getElementById('newPostBtn').style.display = currentUser ? 'block' : 'none';
+}
+
+async function loadCategoryPosts(cateId) {
+    const container = document.getElementById('categoryPosts');
+    container.innerHTML = '<div class="loading">加载中</div>';
+    
+    try {
+        const { data, error } = await supabase
+            .from('post')
+            .select('*, category (name), user (nickname)')
+            .eq('cate_id', cateId)
+            .eq('status', 1)
+            .eq('is_check', 1)
+            .order('create_time', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">暂无帖子，快来发布第一篇吧！</div></div>';
+            return;
+        }
+        
+        container.innerHTML = data.map(post => `
+            <div class="post-list-item" onclick="viewPost(${post.id})">
+                <div class="post-list-content">
+                    <div class="post-title">${post.title}</div>
+                    <div class="post-meta"><span>👤 ${post.user?.nickname || '匿名'}</span><span>📅 ${formatDate(post.create_time)}</span><span>⬇️ ${post.download_count || 0}</span></div>
+                </div>
+                ${post.file_path ? '<span class="post-status status-approved">📦 有资源</span>' : ''}
+            </div>
+        `).join('');
+    } catch (error) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-text">加载失败，请稍后重试</div></div>';
+    }
+}
+
+async function loadHomePosts() {
+    const container = document.getElementById('homePosts');
+    container.innerHTML = '<div class="loading">加载中</div>';
+    
+    try {
+        const { data, error } = await supabase
+            .from('post')
+            .select('*, category (name), user (nickname)')
+            .eq('status', 1)
+            .eq('is_check', 1)
+            .order('create_time', { ascending: false })
+            .limit(12);
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">🎮</div><div class="empty-state-text">暂无游戏包，精彩即将上线！</div></div>';
+            return;
+        }
+        
+        container.innerHTML = data.map(post => `
+            <div class="post-card" onclick="viewPost(${post.id})">
+                <div class="post-card-header">
+                    <span class="post-cate-badge">${post.category?.name || '未分类'}</span>
+                    <div class="post-title">${post.title}</div>
+                    <div class="post-meta"><span>👤 ${post.user?.nickname || '匿名'}</span><span>📅 ${formatDate(post.create_time)}</span></div>
+                </div>
+                <div class="post-card-body">
+                    <div class="post-excerpt">${post.content || '暂无描述'}</div>
+                    <div class="post-footer">
+                        <div class="post-stats"><span>💬 0</span><span>⬇️ ${post.download_count || 0}</span></div>
+                        ${post.file_path ? '<span class="post-status status-approved">📦 可下载</span>' : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">数据库未初始化，请先运行SQL脚本</div></div>';
+    }
+}
+
+async function viewPost(postId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-post').classList.add('active');
+    
+    const container = document.getElementById('postDetail');
+    container.innerHTML = '<div class="loading">加载中</div>';
+    
+    try {
+        const { data, error } = await supabase
+            .from('post')
+            .select('*, category (name), user (nickname)')
+            .eq('id', postId)
+            .single();
+        
+        if (error) throw error;
+        
+        currentPost = data;
+        
+        if (data.file_path) {
+            await supabase.from('post').update({ download_count: (data.download_count || 0) + 1 }).eq('id', postId);
+        }
+        
+        container.innerHTML = `
+            <div class="post-detail-header">
+                <span class="post-cate-badge">${data.category?.name || '未分类'}</span>
+                <h1 class="post-detail-title">${data.title}</h1>
+                <div class="post-detail-meta"><span>👤 ${data.user?.nickname || '匿名'}</span><span>📅 ${formatDate(data.create_time)}</span><span>⬇️ ${(data.download_count || 0) + (data.file_path ? 1 : 0)}</span></div>
+            </div>
+            <div class="post-detail-content">${data.content || '暂无内容'}</div>
+            ${data.file_path ? `
+                <div class="post-download-section">
+                    <h4>📦 游戏包下载</h4>
+                    <p style="color: var(--text-secondary); margin: 10px 0;">文件名：${data.file_name || '游戏包'} ${data.file_size ? '| 大小：' + formatFileSize(data.file_size) : ''}</p>
+                    <a href="${data.file_path}" class="download-btn" download="${data.file_name}">⬇️ 点击下载游戏包</a>
+                </div>
+            ` : ''}
+        `;
+        
+        document.getElementById('commentForm').style.display = currentUser ? 'block' : 'none';
+        await loadComments(postId);
+    } catch (error) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-text">加载失败</div></div>';
+    }
+}
+
+async function loadComments(postId) {
+    const container = document.getElementById('commentsList');
+    try {
+        const { data, error } = await supabase
+            .from('comment')
+            .select('*, user (nickname)')
+            .eq('post_id', postId)
+            .order('create_time', { ascending: true });
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            container.innerHTML = '<div class="empty-state"><div class="empty-state-text">暂无评论</div></div>';
+            return;
+        }
+        
+        container.innerHTML = data.map(comment => `
+            <div class="comment-item">
+                <div class="comment-header"><span class="comment-user">👤 ${comment.user?.nickname || '匿名'}</span><span class="comment-time">${formatDate(comment.create_time)}</span></div>
+                <div class="comment-content">${comment.content}</div>
+            </div>
+        `).join('');
+    } catch (error) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-text">加载评论失败</div></div>';
+    }
+}
+
+async function submitComment() {
+    if (!currentUser) { showToast('请先登录', 'warning'); return; }
+    const content = document.getElementById('commentContent').value.trim();
+    if (!content) { showToast('请输入评论内容', 'warning'); return; }
+    
+    try {
+        const { error } = await supabase.from('comment').insert({
+            post_id: currentPost.id,
+            user_id: currentUser.id,
+            content: content
+        });
+        if (error) throw error;
+        document.getElementById('commentContent').value = '';
+        showToast('评论成功', 'success');
+        await loadComments(currentPost.id);
+    } catch (error) {
+        showToast('评论失败，请稍后重试', 'error');
+    }
+}
+
+function handleAuthTabClick(e) {
+    const tab = e.target.dataset.tab;
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    e.target.classList.add('active');
+    document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+}
+
+async function login() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    if (!username || !password) { showToast('请输入用户名和密码', 'warning'); return; }
+    
+    try {
+        const { data, error } = await supabase.from('user').select('*').eq('username', username).single();
+        if (error) throw error;
+        if (data.password !== password) { showToast('密码错误', 'error'); return; }
+        currentUser = data;
+        localStorage.setItem('user', JSON.stringify(data));
+        updateUserUI();
+        showToast('登录成功', 'success');
+        navigateTo('home');
+    } catch (error) {
+        showToast('用户名或密码错误', 'error');
+    }
+}
+
+async function register() {
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const nickname = document.getElementById('regNickname').value.trim();
+    if (!username || !password || !nickname) { showToast('请填写所有字段', 'warning'); return; }
+    
+    try {
+        const { data: existing } = await supabase.from('user').select('id').eq('username', username).single();
+        if (existing) { showToast('用户名已存在', 'error'); return; }
+        
+        const { data, error } = await supabase.from('user').insert({
+            username: username,
+            password: password,
+            nickname: nickname,
+            role: 0,
+            integral: 0,
+            status: 1
+        }).select().single();
+        
+        if (error) throw error;
+        currentUser = data;
+        localStorage.setItem('user', JSON.stringify(data));
+        updateUserUI();
+        showToast('注册成功', 'success');
+        navigateTo('home');
+    } catch (error) {
+        showToast('注册失败，请稍后重试', 'error');
+    }
+}
+
+function logout() {
+    currentUser = null;
+    localStorage.removeItem('user');
+    updateUserUI();
+    showToast('已退出登录', 'success');
+    navigateTo('home');
+}
+
+function updateUserUI() {
+    const loginBtn = document.getElementById('loginBtn');
+    const userInfo = document.getElementById('userInfo');
+    const adminPanel = document.getElementById('adminPanel');
+    
+    if (currentUser) {
+        loginBtn.style.display = 'none';
+        userInfo.style.display = 'flex';
+        document.getElementById('usernameDisplay').textContent = currentUser.nickname;
+        const roleNames = ['普通用户', '版主', '管理员'];
+        document.getElementById('userRole').textContent = roleNames[currentUser.role] || '普通用户';
+        adminPanel.style.display = currentUser.role === 2 ? 'block' : 'none';
+        if (currentUser.role === 2) loadAdminPanel();
+    } else {
+        loginBtn.style.display = 'block';
+        userInfo.style.display = 'none';
+        adminPanel.style.display = 'none';
+    }
+}
+
+function showPostEditor() {
+    if (!currentUser) { showToast('请先登录', 'warning'); return; }
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-editor').classList.add('active');
+    loadCategoriesToEditor();
+}
+
+async function loadCategoriesToEditor() {
+    const select = document.getElementById('postCate');
+    try {
+        const { data, error } = await supabase.from('category').select('*').eq('status', 1).order('sort', { ascending: true });
+        if (error) throw error;
+        select.innerHTML = data.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+        if (currentCategory) select.value = currentCategory;
+    } catch (error) {
+        select.innerHTML = '<option value="1">小魔头暴露啦专区</option><option value="2">Galgame交流区</option><option value="3">游戏包上传下载</option><option value="4">同人创作区</option>';
+    }
+}
+
+async function submitPost() {
+    if (!currentUser) { showToast('请先登录', 'warning'); return; }
+    const cateId = document.getElementById('postCate').value;
+    const title = document.getElementById('postTitle').value.trim();
+    const content = document.getElementById('postContent').value.trim();
+    if (!title || !content) { showToast('请填写标题和内容', 'warning'); return; }
+    
+    try {
+        let filePath = null, fileName = null, fileSize = null;
+        const fileInput = document.getElementById('postFile');
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            fileName = file.name;
+            fileSize = file.size;
+            filePath = 'https://example.com/downloads/' + Date.now() + '-' + file.name;
+        }
+        const isCheck = (filePath || cateId === '3') ? 0 : 1;
+        
+        const { error } = await supabase.from('post').insert({
+            cate_id: cateId,
+            user_id: currentUser.id,
+            title: title,
+            content: content,
+            file_path: filePath,
+            file_name: fileName,
+            file_size: fileSize,
+            is_check: isCheck,
+            status: 1
+        });
+        if (error) throw error;
+        showToast(isCheck ? '帖子已提交，等待审核' : '发布成功', 'success');
+        cancelPost();
+        navigateTo('home');
+        loadHomePosts();
+    } catch (error) {
+        showToast('发布失败，请稍后重试', 'error');
+    }
+}
+
+function cancelPost() {
+    document.getElementById('postTitle').value = '';
+    document.getElementById('postContent').value = '';
+    document.getElementById('postFile').value = '';
+    navigateTo('home');
+}
+
+async function loadAdminPanel() {
+    const content = document.getElementById('adminContent');
+    content.innerHTML = '<div class="loading">加载中</div>';
+    
+    try {
+        const { data, error } = await supabase
+            .from('post')
+            .select('*, category (name), user (nickname)')
+            .eq('is_check', 0)
+            .order('create_time', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            content.innerHTML = '<div class="empty-state"><div class="empty-state-text">暂无待审核帖子</div></div>';
+            return;
+        }
+        
+        content.innerHTML = data.map(post => `
+            <div class="admin-item">
+                <div class="admin-item-header"><strong>${post.title}</strong><span>${post.category?.name}</span></div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px;">作者: ${post.user?.nickname} | ${formatDate(post.create_time)}</div>
+                <div class="admin-item-actions">
+                    <button onclick="approvePost(${post.id})" class="btn-primary btn-small btn-success">✅ 通过</button>
+                    <button onclick="rejectPost(${post.id})" class="btn-primary btn-small btn-danger">❌ 拒绝</button>
+                    <button onclick="deletePost(${post.id})" class="btn-secondary btn-small">🗑️ 删除</button>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        content.innerHTML = '<div class="empty-state"><div class="empty-state-text">加载失败</div></div>';
+    }
+}
+
+async function approvePost(postId) {
+    try {
+        await supabase.from('post').update({ is_check: 1 }).eq('id', postId);
+        showToast('已通过审核', 'success');
+        loadAdminPanel();
+    } catch (error) { showToast('操作失败', 'error'); }
+}
+
+async function rejectPost(postId) {
+    try {
+        await supabase.from('post').update({ is_check: 2 }).eq('id', postId);
+        showToast('已拒绝', 'success');
+        loadAdminPanel();
+    } catch (error) { showToast('操作失败', 'error'); }
+}
+
+async function deletePost(postId) {
+    if (!confirm('确定要删除这篇帖子吗？')) return;
+    try {
+        await supabase.from('post').delete().eq('id', postId);
+        showToast('已删除', 'success');
+        loadAdminPanel();
+    } catch (error) { showToast('删除失败', 'error'); }
+}
+
+function handleAdminTabClick(e) {
+    const tab = e.target.dataset.tab;
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    e.target.classList.add('active');
+    if (tab === 'pending') loadAdminPanel();
+    else if (tab === 'users') loadUserManagement();
+}
+
+async function loadUserManagement() {
+    const content = document.getElementById('adminContent');
+    content.innerHTML = '<div class="loading">加载中</div>';
+    
+    try {
+        const { data, error } = await supabase.from('user').select('*').order('create_time', { ascending: false });
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            content.innerHTML = '<div class="empty-state"><div class="empty-state-text">暂无用户</div></div>';
+            return;
+        }
+        
+        const roleNames = ['普通用户', '版主', '管理员'];
+        content.innerHTML = data.map(user => `
+            <div class="admin-item">
+                <div class="admin-item-header"><strong>${user.nickname}</strong><span>${roleNames[user.role] || '普通用户'}</span></div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px;">用户名: ${user.username} | 积分: ${user.integral || 0}</div>
+                <div class="admin-item-actions">
+                    ${user.role < 2 ? '<button onclick="setUserRole(' + user.id + ', 2)" class="btn-primary btn-small">设为管理员</button>' : ''}
+                    <button onclick="toggleUserStatus(${user.id}, ${user.status === 1 ? 0 : 1})" class="btn-secondary btn-small">${user.status === 1 ? '禁用' : '启用'}</button>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        content.innerHTML = '<div class="empty-state"><div class="empty-state-text">加载失败</div></div>';
+    }
+}
+
+async function setUserRole(userId, role) {
+    try {
+        await supabase.from('user').update({ role: role }).eq('id', userId);
+        showToast('设置成功', 'success');
+        loadUserManagement();
+    } catch (error) { showToast('操作失败', 'error'); }
+}
+
+async function toggleUserStatus(userId, status) {
+    try {
+        await supabase.from('user').update({ status: status }).eq('id', userId);
+        showToast(status ? '已启用' : '已禁用', 'success');
+        loadUserManagement();
+    } catch (error) { showToast('操作失败', 'error'); }
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '';
     const date = new Date(dateStr);
-    const now = new Date();
-    const diff = now - date;
-    
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-    
-    if (minutes < 1) return '刚刚';
-    if (minutes < 60) return `${minutes}分钟前`;
-    if (hours < 24) return `${hours}小时前`;
-    if (days < 7) return `${days}天前`;
-    
-    return date.toLocaleDateString('zh-CN');
+    return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
 }
 
-function formatViews(views) {
-    if (views >= 1000) {
-        return (views / 1000).toFixed(1) + 'k';
-    }
-    return views;
+function formatFileSize(bytes) {
+    if (!bytes) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
 }
 
-// 移动端菜单
-function toggleMobileMenu() {
-    const navLinks = document.querySelector('.nav-links');
-    navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast ' + type + ' show';
+    setTimeout(() => toast.classList.remove('show'), 3000);
 }

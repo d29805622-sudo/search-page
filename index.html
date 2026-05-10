@@ -3,770 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>幻想三国 - 经典怀旧回合手游</title>
-    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: "Microsoft Yahei", sans-serif;
-            background: #050508;
-            color: #f5f5f5;
-            line-height: 1.7;
-        }
-
-        /* 全局毛笔字体 */
-        .brush-font {
-            font-family: "Ma Shan Zheng", cursive;
-            font-weight: normal;
-            letter-spacing: 2px;
-        }
-
-        /* 高级暗调国风渐变字 */
-        .art-text {
-            background: linear-gradient(135deg, #b89668, #8c704e);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 3px 8px rgba(0,0,0,0.6);
-        }
-
-        /* 背景层 */
-        .bg-wrap {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            background: linear-gradient(145deg, #07070e, #120c0c, #06060a);
-        }
-
-        .bg-light {
-            position: fixed;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(rgba(184,150,104,0.08), transparent 70%);
-            top: 10%;
-            right: 5%;
-            z-index: -1;
-        }
-
-        /* 导航栏 */
-        .top-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            padding: 12px 20px;
-            background: rgba(5, 5, 8, 0.9);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(184, 150, 104, 0.2);
-        }
-
-        .nav-link {
-            color: #888;
-            text-decoration: none;
-            font-size: 14px;
-            padding: 6px 16px;
-            border-radius: 20px;
-            transition: all 0.2s;
-        }
-
-        .nav-link:hover {
-            color: #b89668;
-            background: rgba(184, 150, 104, 0.1);
-        }
-
-        .nav-link.active {
-            color: #fff;
-            background: linear-gradient(135deg, rgba(184, 150, 104, 0.3), rgba(140, 112, 78, 0.3));
-        }
-
-        /* 顶部Banner */
-        .header-banner {
-            margin-top: 50px;
-            width: 100%;
-            height: 360px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 0 20px;
-            background: linear-gradient(rgba(0,0,0,0.8), rgba(2,2,5,0.95)), 
-                        url("https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9rns3rl9e/31d11019103c44889103391039103910~tplv-a9rns3rl9e-image.image") center/cover no-repeat;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header-banner::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 80px;
-            background: linear-gradient(transparent, #050508);
-        }
-
-        .header-banner h1 {
-            font-size: 52px;
-            margin-bottom: 4px;
-        }
-
-        .header-banner .server-tag {
-            font-size: 28px;
-            margin-bottom: 10px;
-            letter-spacing: 4px;
-        }
-
-        .header-banner .banner-subtitle {
-            font-size: 16px;
-            color: #999;
-            letter-spacing: 1px;
-            margin-bottom: 0;
-        }
-
-        /* 国风渐变按钮 */
-        .download-btn {
-            margin-top: 28px;
-            padding: 14px 45px;
-            background: linear-gradient(135deg, #5a1515, #3d0d0d);
-            border: 1px solid rgba(184,150,104,0.25);
-            border-radius: 50px;
-            color: #ddd;
-            text-decoration: none;
-            font-size: 16px;
-            backdrop-filter: blur(8px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-            display: inline-block;
-        }
-
-        .download-btn:active {
-            transform: scale(0.96);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        /* 容器 */
-        .container {
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 50px 18px;
-        }
-
-        /* 标题样式 */
-        .title-line {
-            font-size: 32px;
-            text-align: center;
-            margin-bottom: 35px;
-            position: relative;
-        }
-
-        .title-line::after {
-            content: "";
-            width: 80px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #8c704e, transparent);
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        /* 介绍卡片 磨砂国风 */
-        .intro {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-            background: rgba(15,15,25,0.5);
-            backdrop-filter: blur(14px);
-            border-radius: 18px;
-            padding: 25px;
-            border: 1px solid rgba(184,150,104,0.1);
-        }
-
-        .intro-text {
-            color: #b4b4c2;
-            font-size: 15px;
-        }
-
-        .intro-img {
-            width: 100%;
-            border-radius: 12px;
-            border: 1px solid rgba(184,150,104,0.2);
-        }
-
-        /* 游戏背景图片样式 */
-        .game-bg-img {
-            width: 100%;
-            border-radius: 12px;
-            border: 1px solid rgba(184,150,104,0.2);
-            margin-bottom: 25px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-        }
-        
-        /* 特色卡片 */
-        .feature-list {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 18px;
-        }
-
-        .feature-item {
-            background: rgba(12,12,22,0.55);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(184,150,104,0.08);
-            border-radius: 16px;
-            padding: 22px;
-            transition: 0.25s ease;
-        }
-
-        .feature-item:active {
-            border-color: rgba(184,150,104,0.3);
-            transform: translateY(-2px);
-        }
-
-        .feature-item h3 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .feature-item p {
-            color: #a0a0b0;
-            font-size: 14px;
-        }
-
-        /* 公告卡片 */
-        .notice-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .notice-item {
-            background: rgba(12,12,22,0.55);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(184,150,104,0.08);
-            border-radius: 14px;
-            padding: 18px 20px;
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-            transition: 0.25s ease;
-        }
-
-        .notice-item:hover {
-            border-color: rgba(184,150,104,0.25);
-            transform: translateY(-2px);
-        }
-
-        .notice-tag {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            flex-shrink: 0;
-        }
-
-        .notice-tag.new {
-            background: linear-gradient(135deg, #5a1515, #3d0d0d);
-            color: #e8c170;
-            border: 1px solid rgba(184,150,104,0.3);
-        }
-
-        .notice-tag.update {
-            background: rgba(30,30,50,0.8);
-            color: #8fa0b0;
-            border: 1px solid rgba(100,120,140,0.2);
-        }
-
-        .notice-tag.event {
-            background: rgba(20,40,30,0.8);
-            color: #70b890;
-            border: 1px solid rgba(100,180,130,0.2);
-        }
-
-        .notice-content {
-            flex: 1;
-        }
-
-        .notice-title {
-            font-size: 15px;
-            color: #d0d0e0;
-            margin-bottom: 4px;
-        }
-
-        .notice-date {
-            font-size: 12px;
-            color: #606070;
-        }
-
-        /* 攻略卡片 */
-        .guide-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-
-        .guide-item {
-            background: rgba(12,12,22,0.55);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(184,150,104,0.08);
-            border-radius: 14px;
-            padding: 20px;
-            transition: 0.25s ease;
-            cursor: pointer;
-        }
-
-        .guide-item:hover {
-            border-color: rgba(184,150,104,0.3);
-            transform: translateY(-2px);
-        }
-
-        .guide-icon {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .guide-item h3 {
-            font-size: 18px;
-            margin-bottom: 6px;
-        }
-
-        .guide-item p {
-            color: #808090;
-            font-size: 13px;
-        }
-
-        /* 社区卡片 */
-        .community-box {
-            background: rgba(15,15,25,0.5);
-            backdrop-filter: blur(14px);
-            border-radius: 18px;
-            padding: 30px 25px;
-            border: 1px solid rgba(184,150,104,0.1);
-            text-align: center;
-        }
-
-        .community-box .community-slogan {
-            font-size: 20px;
-            margin-bottom: 15px;
-        }
-
-        .community-box .community-desc {
-            color: #9090a0;
-            font-size: 14px;
-            margin-bottom: 25px;
-        }
-
-        .community-btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .community-btn {
-            padding: 12px 35px;
-            background: linear-gradient(135deg, rgba(90,21,21,0.8), rgba(61,13,13,0.8));
-            border: 1px solid rgba(184,150,104,0.25);
-            border-radius: 50px;
-            color: #ddd;
-            text-decoration: none;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            display: inline-block;
-        }
-
-        .community-btn:hover {
-            background: linear-gradient(135deg, #5a1515, #3d0d0d);
-            border-color: rgba(184,150,104,0.5);
-            transform: translateY(-2px);
-        }
-
-        /* FAQ 手风琴 */
-        .faq-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .faq-item {
-            background: rgba(12,12,22,0.55);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(184,150,104,0.08);
-            border-radius: 14px;
-            overflow: hidden;
-            transition: 0.25s ease;
-        }
-
-        .faq-item:hover {
-            border-color: rgba(184,150,104,0.2);
-        }
-
-        .faq-question {
-            padding: 16px 20px;
-            font-size: 15px;
-            color: #c0c0d0;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .faq-question::after {
-            content: "▼";
-            font-size: 12px;
-            color: #606070;
-            transition: transform 0.3s ease;
-        }
-
-        .faq-item.active .faq-question::after {
-            transform: rotate(180deg);
-        }
-
-        .faq-answer {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-            padding: 0 20px;
-        }
-
-        .faq-item.active .faq-answer {
-            max-height: 200px;
-            padding: 0 20px 16px;
-        }
-
-        .faq-answer p {
-            color: #9090a0;
-            font-size: 14px;
-            line-height: 1.7;
-        }
-
-        /* 联系卡片 */
-        .contact-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-
-        .contact-item {
-            background: rgba(12,12,22,0.55);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(184,150,104,0.08);
-            border-radius: 14px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .contact-item .contact-icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-
-        .contact-item h3 {
-            font-size: 16px;
-            margin-bottom: 6px;
-        }
-
-        .contact-item p {
-            color: #808090;
-            font-size: 13px;
-        }
-
-        .contact-item a {
-            color: #b89668;
-            text-decoration: none;
-        }
-
-        .contact-item a:hover {
-            text-decoration: underline;
-        }
-
-        /* 下载区域 */
-        .down-box {
-            text-align: center;
-        }
-
-        .down-box .download-btn + .download-btn {
-            margin-top: 16px;
-        }
-
-        /* 页脚 */
-        footer {
-            text-align: center;
-            padding: 25px 15px;
-            color: #606070;
-            font-size: 13px;
-        }
-
-        /* 响应式 */
-        @media (max-width: 480px) {
-            .header-banner h1 {
-                font-size: 40px;
-            }
-            .header-banner .server-tag {
-                font-size: 22px;
-            }
-            .title-line {
-                font-size: 26px;
-            }
-            .notice-item {
-                flex-direction: column;
-                gap: 10px;
-            }
-        }
-    </style>
+    <title>🧛‍♂️小魔头Galgame资源论坛🧩</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="bg-wrap"></div>
-    <div class="bg-light"></div>
-
-    <!-- 导航栏 -->
-    <nav class="top-nav">
-        <a href="index.html" class="nav-link active">首页</a>
-        <a href="pages/community.html" class="nav-link">玩家社区</a>
-        <a href="pages/posts.html" class="nav-link">攻略中心</a>
-    </nav>
-
-    <!-- 顶部Banner -->
-    <header class="header-banner">
-        <h1 class="brush-font art-text">幻想三国</h1>
-        <p class="brush-font art-text server-tag">鱼丸服</p>
-        <p class="banner-subtitle">乱世群雄 · 经典回合 · 怀旧手游巨作</p>
-        <a href="#" class="download-btn">立即下载</a>
-    </header>
-
-    <div class="container">
-        <!-- 游戏背景 -->
-        <section>
-            <h2 class="title-line brush-font art-text">游戏背景</h2>
-            <img src="game-bg.jpg" alt="游戏背景" class="game-bg-img">
-            <div class="intro">
-                <p class="intro-text">
-                    东汉末年，狼烟四起，天下三分。魏蜀吴群雄割据，猛将谋士齐聚乱世。
-                </p>
-                <p class="intro-text">
-                    复刻原版幻想三国经典框架，还原回合制经典战斗、自由交易、野外混战、军团争霸等核心玩法。
-                </p>
-                <p class="intro-text">
-                    复古美术搭配全新优化体验，重温年少三国江湖。
-                </p>
+    <div class="background-overlay"></div>
+    <div class="main-container">
+        <header class="header">
+            <div class="logo">🧛‍♂️ 小魔头 Galgame 资源论坛 🧩</div>
+            <nav class="nav">
+                <a href="#" class="nav-item active" data-page="home">首页</a>
+                <a href="#" class="nav-item" data-page="xiaomogui">小魔头</a>
+                <a href="#" class="nav-item" data-page="ggame">G游戏</a>
+                <a href="#" class="nav-item" data-page="upload">上传游戏包</a>
+                <a href="#" class="nav-item" data-page="login" id="loginBtn">登录/注册</a>
+            </nav>
+            <div class="user-info" id="userInfo" style="display:none;">
+                <span id="usernameDisplay"></span>
+                <span id="userRole"></span>
+                <button onclick="logout()" class="btn-logout">退出</button>
             </div>
-        </section>
-
-        <!-- 核心特色 -->
-        <section style="margin-top: 60px;">
-            <h2 class="title-line brush-font art-text">核心特色</h2>
-            <div class="feature-list">
-                <div class="feature-item">
-                    <h3 class="art-text">经典回合对战</h3>
-                    <p>复刻原版战斗逻辑，属性克制、技能组合，还原复古对战快感。</p>
+        </header>
+        <div class="banner">
+            <h1>动漫交流 | Galgame游戏包 | 同人</h1>
+            <p class="subtitle">🌟 下载游戏包无需登录 | 上传游戏包需管理员审核 🌟</p>
+        </div>
+        <div class="categories" id="categories"></div>
+        <main class="content">
+            <section id="page-home" class="page active">
+                <h2 class="section-title">🎮 精选游戏包 🎮</h2>
+                <div class="posts-grid" id="homePosts"></div>
+            </section>
+            <section id="page-category" class="page">
+                <div class="category-header">
+                    <h2 id="categoryTitle">分类名称</h2>
+                    <button class="btn-primary" onclick="showPostEditor()" id="newPostBtn" style="display:none;">发布帖子</button>
                 </div>
-                <div class="feature-item">
-                    <h3 class="art-text">名将自由养成</h3>
-                    <p>数百三国名将任意招募，装备打造、进阶突破，自由搭配阵容。</p>
+                <div class="posts-list" id="categoryPosts"></div>
+            </section>
+            <section id="page-post" class="page">
+                <div class="post-detail" id="postDetail"></div>
+                <div class="comments-section">
+                    <h3>💬 评论</h3>
+                    <div class="comment-form" id="commentForm" style="display:none;">
+                        <textarea id="commentContent" placeholder="写下你的评论..."></textarea>
+                        <button onclick="submitComment()" class="btn-primary">发表评论</button>
+                    </div>
+                    <div class="comments-list" id="commentsList"></div>
                 </div>
-                <div class="feature-item">
-                    <h3 class="art-text">自由野外PK</h3>
-                    <p>全地图自由切磋，皇城对决、多人混战，沉浸式乱世对抗。</p>
-                </div>
-                <div class="feature-item">
-                    <h3 class="art-text">开放式交易</h3>
-                    <p>离线摆摊、道具流通，自由交易，休闲轻松发育。</p>
-                </div>
-                <div class="feature-item">
-                    <h3 class="art-text">军团社交体系</h3>
-                    <p>组队副本、军团攻城，并肩征战，结识三国同好。</p>
-                </div>
-                <div class="feature-item">
-                    <h3 class="art-text">复古怀旧画风</h3>
-                    <p>原汁原味经典UI，唤醒老玩家专属青春回忆。</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- 最新公告 -->
-        <section style="margin-top: 60px;">
-            <h2 class="title-line brush-font art-text">最新公告</h2>
-            <div class="notice-list">
-                <div class="notice-item">
-                    <span class="notice-tag new">NEW</span>
-                    <div class="notice-content">
-                        <p class="notice-title">「幻想三国」1.8.0版本更新公告</p>
-                        <p class="notice-date">2026年01月18日</p>
+            </section>
+            <section id="page-editor" class="page">
+                <div class="editor-container">
+                    <h2>📝 发布帖子</h2>
+                    <div class="form-group">
+                        <label>分类</label>
+                        <select id="postCate"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>标题</label>
+                        <input type="text" id="postTitle" placeholder="请输入帖子标题">
+                    </div>
+                    <div class="form-group">
+                        <label>内容</label>
+                        <textarea id="postContent" placeholder="请输入帖子内容"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>上传游戏包（可选）</label>
+                        <input type="file" id="postFile">
+                        <small>支持 ZIP/RAR/7Z 格式，最大 500MB</small>
+                    </div>
+                    <div class="form-actions">
+                        <button onclick="submitPost()" class="btn-primary">发布帖子</button>
+                        <button onclick="cancelPost()" class="btn-secondary">取消</button>
                     </div>
                 </div>
-                <div class="notice-item">
-                    <span class="notice-tag event">活动</span>
-                    <div class="notice-content">
-                        <p class="notice-title">春节限定活动「桃园结义」正式开启</p>
-                        <p class="notice-date">2026年01月15日</p>
+            </section>
+            <section id="page-login" class="page">
+                <div class="auth-container">
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" data-tab="login">登录</button>
+                        <button class="auth-tab" data-tab="register">注册</button>
+                    </div>
+                    <div class="auth-form" id="loginForm">
+                        <div class="form-group">
+                            <label>用户名</label>
+                            <input type="text" id="loginUsername" placeholder="请输入用户名">
+                        </div>
+                        <div class="form-group">
+                            <label>密码</label>
+                            <input type="password" id="loginPassword" placeholder="请输入密码">
+                        </div>
+                        <button onclick="login()" class="btn-primary btn-full">登录</button>
+                    </div>
+                    <div class="auth-form" id="registerForm" style="display:none;">
+                        <div class="form-group">
+                            <label>用户名</label>
+                            <input type="text" id="regUsername" placeholder="请输入用户名">
+                        </div>
+                        <div class="form-group">
+                            <label>密码</label>
+                            <input type="password" id="regPassword" placeholder="请输入密码">
+                        </div>
+                        <div class="form-group">
+                            <label>昵称</label>
+                            <input type="text" id="regNickname" placeholder="请输入昵称">
+                        </div>
+                        <button onclick="register()" class="btn-primary btn-full">注册</button>
                     </div>
                 </div>
-                <div class="notice-item">
-                    <span class="notice-tag update">优化</span>
-                    <div class="notice-content">
-                        <p class="notice-title">服务器「鱼丸服」已升级为双线区服</p>
-                        <p class="notice-date">2026年01月10日</p>
-                    </div>
-                </div>
-                <div class="notice-item">
-                    <span class="notice-tag event">活动</span>
-                    <div class="notice-content">
-                        <p class="notice-title">累计登录领红将「赵云」活动正在进行中</p>
-                        <p class="notice-date">2026年01月05日</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 玩家攻略 -->
-        <section style="margin-top: 60px;">
-            <h2 class="title-line brush-font art-text">玩家攻略</h2>
-            <div class="guide-grid">
-                <div class="guide-item">
-                    <div class="guide-icon">⚔️</div>
-                    <h3 class="art-text">新手入门指南</h3>
-                    <p>从创建角色到首次战斗，完整的新手教程让你快速上手三国乱世。</p>
-                </div>
-                <div class="guide-item">
-                    <div class="guide-icon">🏆</div>
-                    <h3 class="art-text">武将培养攻略</h3>
-                    <p>武将进阶、装备选择、技能搭配，助你打造最强阵容称霸三国。</p>
-                </div>
-                <div class="guide-item">
-                    <div class="guide-icon">💰</div>
-                    <h3 class="art-text">交易行入门</h3>
-                    <p>自由交易技巧、物价分析、摆摊攻略，教你轻松赚取游戏货币。</p>
-                </div>
-                <div class="guide-item">
-                    <div class="guide-icon">⚔️</div>
-                    <h3 class="art-text">PVP竞技指南</h3>
-                    <p>野外PK、竞技场战斗技巧，了解属性克制与技能释放时机。</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- 官方社群 -->
-        <section style="margin-top: 60px;">
-            <h2 class="title-line brush-font art-text">官方社群</h2>
-            <div class="community-box">
-                <p class="community-slogan brush-font art-text">与千万玩家一起征战三国</p>
-                <p class="community-desc">加入官方社群，结识志同道合的战友，获取最新资讯，参与丰富活动，领取专属福利</p>
-                <div class="community-btn-group">
-                    <a href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=mqkBDRmi1ukmV6qpAldqcRHCkNOD7n4P&authKey=%2FK3vgkMopYWY0XGKBicjcd2wuGlc8%2FCFfS5YK8CCDu7ABemG7ZsO2X70Xfy%2FzxxM&noverify=0&group_code=731351277" class="community-btn" target="_blank">
-                        🎮 加入官方QQ群
-                    </a>
-                    <a href="#" class="community-btn">
-                        💬 添加客服微信
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <!-- 常见问题 -->
-        <section style="margin-top: 60px;">
-            <h2 class="title-line brush-font art-text">常见问题</h2>
-            <div class="faq-list">
-                <div class="faq-item">
-                    <div class="faq-question">如何下载游戏？</div>
-                    <div class="faq-answer">
-                        <p>点击页面顶部的「立即下载」按钮，或在官方社群群文件下载最新安装包。Android和iOS用户均可下载体验。</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">游戏是否需要付费？</div>
-                    <div class="faq-answer">
-                        <p>游戏本体免费游玩，游戏中提供付费道具但不影响核心体验。零氪玩家同样可以通过日常任务和活动获得丰厚奖励。</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">如何加入军团？</div>
-                    <div class="faq-answer">
-                        <p>达到15级后，可在主城「军团管理员」处申请加入军团，或花费金币创建自己的军团，参与军团副本和攻城战。</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">游戏数据可以保存吗？</div>
-                    <div class="faq-answer">
-                        <p>游戏数据与账号绑定，换设备登录同一账号即可继续游戏。建议绑定手机号或微信以便找回账号。</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">遇到游戏问题如何反馈？</div>
-                    <div class="faq-answer">
-                        <p>可通过官方QQ群联系管理员，或在游戏内设置-客服中心提交问题，我们会尽快处理。</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 联系我们 -->
-        <section style="margin-top: 60px;">
-            <h2 class="title-line brush-font art-text">联系我们</h2>
-            <div class="contact-grid">
-                <div class="contact-item">
-                    <div class="contact-icon">📱</div>
-                    <h3 class="art-text">客服微信</h3>
-                    <p>添加官方客服，实时解答游戏问题</p>
-                </div>
-                <div class="contact-item">
-                    <div class="contact-icon">📧</div>
-                    <h3 class="art-text">官方邮箱</h3>
-                    <p><a href="mailto:support@fxsanguo.com">support@fxsanguo.com</a></p>
-                </div>
-                <div class="contact-item">
-                    <div class="contact-icon">⏰</div>
-                    <h3 class="art-text">服务时间</h3>
-                    <p>每日 9:00 - 22:00</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- 下载区域 -->
-        <section style="margin-top: 60px;">
-            <h2 class="title-line brush-font art-text">即刻入驻乱世</h2>
-            <div class="down-box">
-                <a href="./apk/" class="download-btn">安卓客户端</a>
-                <a href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=mqkBDRmi1ukmV6qpAldqcRHCkNOD7n4P&authKey=%2FK3vgkMopYWY0XGKBicjcd2wuGlc8%2FCFfS5YK8CCDu7ABemG7ZsO2X70Xfy%2FzxxM&noverify=0&group_code=731351277" class="download-btn" target="_blank">官方社群</a>
-            </div>
-        </section>
+            </section>
+        </main>
+        <footer class="footer">
+            <p>© 2025 小魔头Galgame资源论坛 - 动漫交流 | Galgame游戏包 | 同人</p>
+            <p>上传游戏包需管理员审核 | 下载游戏包无需登录</p>
+        </footer>
     </div>
-
-    <!-- 页脚 -->
-    <footer>
-        <p>幻想三国 © 2026</p>
-        <p style="margin-top: 5px; font-size: 12px;">国风毛笔定制落地页</p>
-    </footer>
-
-    <!-- FAQ 交互脚本 -->
-    <script>
-        document.querySelectorAll('.faq-question').forEach(question => {
-            question.addEventListener('click', () => {
-                const item = question.parentElement;
-                const isActive = item.classList.contains('active');
-                
-                // 关闭所有其他项
-                document.querySelectorAll('.faq-item').forEach(i => {
-                    i.classList.remove('active');
-                });
-                
-                // 切换当前项
-                if (!isActive) {
-                    item.classList.add('active');
-                }
-            });
-        });
-    </script>
+    <div class="toast" id="toast"></div>
+    <div class="admin-panel" id="adminPanel" style="display:none;">
+        <h3>🔧 管理员面板</h3>
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="pending">待审核帖子</button>
+            <button class="admin-tab" data-tab="users">用户管理</button>
+        </div>
+        <div class="admin-content" id="adminContent"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>

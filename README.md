@@ -1,115 +1,54 @@
-# 幻想三国社区系统 - 部署指南
+# 🧛‍♂️ 小魔头Galgame资源论坛 🧩
 
-## 📋 概述
+一个基于 Supabase 的 Galgame 资源论坛，支持游戏包上传下载、帖子发布、评论互动等功能。
 
-本项目包含幻想三国官网的完整社区系统，包括玩家社区和攻略中心。
+## 功能特性
 
-## 🗄️ Supabase 数据库配置
+- 📋 **板块分类**：小魔头暴露啦专区、Galgame交流区、游戏包上传下载、同人创作区
+- 👤 **用户系统**：注册/登录、积分系统、角色权限（普通用户/版主/管理员）
+- 📝 **帖子系统**：发布帖子、评论互动、游戏包下载
+- 📦 **文件管理**：游戏包上传（需审核）、直接下载（无需登录）
+- 🔧 **管理后台**：帖子审核、用户管理
 
-### 获取 API Keys
+## 技术栈
 
-1. 登录 [Supabase Dashboard](https://supabase.com/dashboard)
-2. 选择项目 `btkupvzkzwnbbhpgkksc`
-3. 进入 **Settings** → **API**
-4. 复制以下信息：
-   - **Project URL**: `https://btkupvzkzwnbbhpgkksc.supabase.co`
-   - **anon public key**: 在 `Project API keys` 下找到
+- **前端**：原生 HTML/CSS/JavaScript
+- **后端**：Supabase (PostgreSQL + Realtime)
+- **样式**：自定义暗色二次元风格 CSS
 
-### 初始化数据库
+## 数据库初始化
 
-#### 方法一：通过 Supabase Dashboard（推荐）
+⚠️ **重要**：请参考 `DATABASE_SETUP.md` 手动在 Supabase Dashboard 中执行 SQL 脚本。
 
-1. 进入项目的 **SQL Editor**
-2. 复制 `supabase-init.sql` 文件的全部内容
-3. 粘贴到 SQL Editor 中
-4. 点击 **Run** 执行
+## 初始账号
 
-#### 方法二：通过 Supabase CLI
+- 用户名：`admin`
+- 密码：`123456`
+- 角色：管理员
 
-```bash
-supabase db execute --project-id btkupvzkzwnbbhpgkksc -f supabase-init.sql
-```
+## 部署
 
-#### 方法三：通过 curl
+本项目为纯静态网页，可直接部署到 GitHub Pages、Vercel、Netlify 等平台。
 
-```bash
-# 首先需要在 Dashboard 中启用 pg_execute 扩展，或使用 Management API
-```
-
-### 数据库结构
-
-执行 `supabase-init.sql` 后会创建以下表：
-
-| 表名 | 说明 |
-|------|------|
-| `posts` | 帖子表 |
-| `comments` | 评论表 |
-| `user_points` | 用户积分表 |
-| `likes` | 点赞记录表 |
-| `view_history` | 浏览记录表 |
-| `favorites` | 收藏表 |
-| `announcements` | 公告表 |
-| `sensitive_words` | 敏感词表 |
-
-### 配置客户端
-
-1. 打开 `js/supabase-config.js`
-2. 将 `YOUR_ANON_PUBLIC_KEY_HERE` 替换为从 Dashboard 获取的 anon public key
-
-```javascript
-const SUPABASE_ANON_KEY = 'eyJhbGc...'; // 替换为你的 key
-```
-
-## 🌐 GitHub 仓库信息
-
-- **仓库地址**: https://github.com/d29805622-sudo/search-page
-- **目标分支**: main
-
-### 部署说明
-
-代码已配置好 GitHub Actions，当推送新代码时会自动构建和部署。
-
-## 📁 文件结构
+## 目录结构
 
 ```
-幻想三国官网/
-├── index.html          # 首页
-├── callback.html       # GitHub OAuth 回调页
-├── game-bg.jpg         # 游戏背景图
-├── apk/                # APK 下载目录
+├── index.html          # 主页面
 ├── css/
-│   ├── style.css       # 主样式文件
-│   └── community.css   # 社区样式文件
+│   └── style.css       # 样式文件
 ├── js/
-│   ├── config.js       # 配置文件
-│   ├── github.js       # GitHub API 封装
-│   ├── app.js          # 社区主逻辑
-│   └── supabase-config.js  # Supabase 配置（需手动配置）
-├── pages/
-│   ├── community.html  # 玩家社区页
-│   └── posts.html      # 攻略中心页
+│   └── app.js          # 应用逻辑
 ├── supabase-init.sql   # 数据库初始化脚本
-└── README.md           # 本文档
+├── DATABASE_SETUP.md   # 数据库设置指南
+└── README.md           # 项目说明
 ```
 
-## 🔐 安全说明
+## 规则说明
 
-- **anon public key**: 可以安全地在前端代码中使用
-- **service_role key**: 仅在服务端使用，**绝对不要**暴露在前端代码中
+- ⬆️ 上传游戏包需管理员审核
+- ⬇️ 下载游戏包无需登录
+- 👑 管理员初始账号：admin / 123456
 
-## ❓ 常见问题
+---
 
-### Q: 社区帖子存储在哪里？
-A: 当前版本使用 GitHub Issues 作为帖子存储后端，Supabase 可用于增强功能如用户积分、点赞等。
-
-### Q: 如何开启 Supabase 增强功能？
-A: 1. 先初始化数据库（执行 supabase-init.sql）
-   2. 配置 js/supabase-config.js 中的 anon key
-   3. 在需要的地方引入 Supabase SDK
-
-### Q: 部署后社区页面打不开？
-A: 检查 GitHub Pages 是否正确配置，仓库 Settings → Pages → Source 应设置为 main 分支。
-
-## 📞 支持
-
-如有问题，请在 GitHub 仓库中提 Issue。
+Made with 💜 for Galgame lovers
